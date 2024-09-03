@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real-Time Sales Dashboard</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Real-Time Sales Data</h1>
+        <table id="sales-table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                </tr>
+            </thead>
+            <tbody id="sales-data">
+                <!-- Sales data will be appended here -->
+            </tbody>
+        </table>
+    </div>
+    <script>
+        const socket = io();
+        socket.on('salesData', function(data) {
+            const salesTable = document.getElementById('sales-data');
+            const newRow = document.createElement('tr');
+            newRow.classList.add('sale-item');
+            newRow.innerHTML = `
+                <td>${data.product}</td>
+                <td>${data.quantity}</td>
+                <td>$${data.price}</td>
+            `;
+            salesTable.appendChild(newRow);
+        });
+    </script>
+</body>
+</html>
