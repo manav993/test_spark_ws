@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Data Graph</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+        .container {
+            width: 80%;
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #ffffff, #e9ecef);
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #343a40;
+            text-align: center;
+        }
+        #myChart {
+            width: 100%;
+            height: 500px;
+        }
+        .navigation {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .nav-link {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+            font-size: 1rem;
+            padding: 10px 20px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .nav-link:hover {
+            text-decoration: none;
+            background-color: #e7f0ff;
+            color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sales Data Graph</h1>
+        <canvas id="myChart"></canvas>
+        <div class="navigation">
+            <a href="index.html" class="nav-link">Back to Sales Data</a>
+        </div>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('myChart').getContext('2d');
+        const socket = io();
+
+        const data = {
+            labels: [], // Will contain product names
+            datasets: [{
+                label: 'Total Sales ($)',
+                data: [], // Will contain sales values
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        };
+
+        const config = {
+            type: 'line',
+            data: data,
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        beginAtZero: true
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) { return '$' + value; }
+                        }
+                    }
+                }
+            }
+        };
+
+        const myChart = new Chart(ctx, config);
+
+        socket.on('salesData', function(data) {
+            const product = data.product;
+            const price = data.price;
+
+            if (data.labels.indexOf(product) === -1) {
+                // Add new product to labels
+                data.labels.push(product);
+                data.datasets[0].data.push(price);
+            } else {
+                // Update existing product's sales value
+                const index = data.labels.indexOf(product);
+                data.datasets[0].data[index] += price;
+            }
+
+            // Update chart
+            myChart.update();
+        });
+    </script>
+</body>
+</html>

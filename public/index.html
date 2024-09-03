@@ -1,8 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Real-Time Sales Dashboard</title>
-    <link rel="stylesheet" href="/styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Sales Data</title>
+    <link rel="stylesheet" href="styles.css">
     <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
@@ -12,27 +14,77 @@
             <thead>
                 <tr>
                     <th>Product</th>
-                    <th>Quantity</th>
-                    <th>Price</th>
+                    <th>Total Quantity</th>
+                    <th>Total Sale price</th>
                 </tr>
             </thead>
-            <tbody id="sales-data">
-                <!-- Sales data will be appended here -->
+            <tbody>
+                <tr id="product-laptop">
+                    <td>Laptop</td>
+                    <td class="quantity">0</td>
+                    <td class="price">$0.00</td>
+                </tr>
+                <tr id="product-smartphone">
+                    <td>Smartphone</td>
+                    <td class="quantity">0</td>
+                    <td class="price">$0.00</td>
+                </tr>
+                <tr id="product-tablet">
+                    <td>Tablet</td>
+                    <td class="quantity">0</td>
+                    <td class="price">$0.00</td>
+                </tr>
+                <tr id="product-headphones">
+                    <td>Headphones</td>
+                    <td class="quantity">0</td>
+                    <td class="price">$0.00</td>
+                </tr>
+                <tr id="product-monitor">
+                    <td>Monitor</td>
+                    <td class="quantity">0</td>
+                    <td class="price">$0.00</td>
+                </tr>
             </tbody>
         </table>
+        <div class="navigation">
+            <a href="graph.html" class="nav-link">Go to Graph Page</a>
+        </div>
     </div>
+
     <script>
         const socket = io();
+
+        // Product totals initialized to zero
+        const productTotals = {
+            'Laptop': { quantity: 0, price: 0 },
+            'Smartphone': { quantity: 0, price: 0 },
+            'Tablet': { quantity: 0, price: 0 },
+            'Headphones': { quantity: 0, price: 0 },
+            'Monitor': { quantity: 0, price: 0 }
+        };
+
+        function updateCell(cell, newValue) {
+            const oldValue = cell.textContent.trim();
+            cell.textContent = newValue;
+            if (oldValue !== newValue) {
+                cell.classList.add('highlight');
+                setTimeout(() => cell.classList.remove('highlight'), 1500); // Highlight for 1.5 seconds
+            }
+        }
+
+        // Update table based on sales data
         socket.on('salesData', function(data) {
-            const salesTable = document.getElementById('sales-data');
-            const newRow = document.createElement('tr');
-            newRow.classList.add('sale-item');
-            newRow.innerHTML = `
-                <td>${data.product}</td>
-                <td>${data.quantity}</td>
-                <td>$${data.price}</td>
-            `;
-            salesTable.appendChild(newRow);
+            if (productTotals[data.product]) {
+                productTotals[data.product].quantity += data.quantity;
+                productTotals[data.product].price += data.price;
+
+                // Update table row
+                const row = document.getElementById(`product-${data.product.toLowerCase()}`);
+                if (row) {
+                    updateCell(row.querySelector('.quantity'), productTotals[data.product].quantity);
+                    updateCell(row.querySelector('.price'), `$${productTotals[data.product].price.toFixed(2)}`);
+                }
+            }
         });
     </script>
 </body>
