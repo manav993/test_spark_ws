@@ -16,4 +16,4 @@ while True:
     }
     producer.send('sales_topic_electronics', sales_data)
     print(f"Produced: {sales_data}")
-    time.sleep(3)
+    time.sleep(2)
